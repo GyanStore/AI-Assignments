@@ -114,8 +114,12 @@ class GeneticAlgorithm:
             fc_weight = 0.008
             
             conv_penalty = (conv_params / 1e6) * conv_weight
-            fc_penalty = (fc_params / 1e6) * fc_weight
+            fc_penalty = (fc_params / 1e6) * fc_penalty
             complexity_penalty = conv_penalty + fc_penalty
+            
+            # Q1B: Print detailed parameter breakdown
+            print(f" | Conv params: {conv_params:,} | FC params: {fc_params:,}", flush=True)
+            print(f" | Conv penalty: {conv_penalty:.6f} | FC penalty: {fc_penalty:.6f} | Total penalty: {complexity_penalty:.6f}", flush=True)
 
             del model, inputs, outputs, labels
             torch.cuda.empty_cache()
@@ -123,6 +127,8 @@ class GeneticAlgorithm:
             architecture.accuracy = best_acc
             architecture.best_epoch = best_epoch
             architecture.fitness = best_acc - complexity_penalty
+            
+            print(f" | Final Fitness: {architecture.fitness:.4f} (Accuracy: {best_acc:.4f} - Penalty: {complexity_penalty:.6f})", flush=True)
             
             return architecture.fitness
             
@@ -140,6 +146,16 @@ class GeneticAlgorithm:
             return random.choices(self.population, k=self.population_size)
         
         probabilities = [arch.fitness / fitness_sum for arch in self.population]
+        
+        # Q1A: Print selection probabilities
+        print(f"\nQ1A - Roulette-Wheel Selection Probabilities:", flush=True)
+        print(f"{'Arch #':<8} {'Fitness':<12} {'Probability':<12} {'Expected Selections':<20}", flush=True)
+        print("-" * 55, flush=True)
+        for i, (arch, prob) in enumerate(zip(self.population, probabilities)):
+            expected = prob * self.population_size
+            print(f"{i+1:<8} {arch.fitness:<12.4f} {prob:<12.4f} {expected:<20.2f}", flush=True)
+        print(f"Total fitness sum: {fitness_sum:.4f}\n", flush=True)
+        
         selected = random.choices(self.population, weights=probabilities, k=self.population_size)
         
         return selected
