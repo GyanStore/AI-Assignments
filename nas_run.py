@@ -6,8 +6,6 @@ from torchvision.datasets import CIFAR10
 from model_ga import GeneticAlgorithm
 from model_cnn import CNN
 
-# if __name__ == "__main__":
-
 parent = os.path.abspath('')
 if not os.path.exists(os.path.join(parent, 'outputs')):
     os.mkdir(os.path.join(parent, 'outputs'))
@@ -20,7 +18,6 @@ sys.stdout = open(os.path.join(parent, 'outputs', f'run_{len(all_logs)+1}', f'na
 
 print(f"Using device: {device}", flush=True)
 
-# Load CIFAR-10 dataset (reduced for faster NAS)
 transform = T.Compose([
     T.ToTensor(),
     T.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
@@ -29,17 +26,15 @@ transform = T.Compose([
 trainset = CIFAR10(root='./data', train=True, download=True, transform=transform)
 valset = CIFAR10(root='./data', train=False, download=True, transform=transform)
 
-# Use only 5000 samples for quick NAS
 train_subset = Subset(trainset, range(5000))
 val_subset = Subset(valset, range(1000))
 
 train_loader = DataLoader(train_subset, batch_size=256, shuffle=True)
 val_loader = DataLoader(val_subset, batch_size=256, shuffle=False)
 
-# Run NAS with GA
 ga = GeneticAlgorithm(
-    population_size=10,  # Small population for demonstration
-    generations=5,       # Few generations for quick results
+    population_size=10,
+    generations=5,
     mutation_rate=0.3,
     crossover_rate=0.7
 )
@@ -53,7 +48,6 @@ print(f"Genes: {best_arch.genes}", flush=True)
 print(f"Accuracy: {best_arch.accuracy:.4f}", flush=True)
 print(f"Fitness: {best_arch.fitness:.4f}", flush=True)
 
-# Build and test final model
 final_model = CNN(best_arch.genes).to(device)
 print(f"\nTotal parameters: {sum(p.numel() for p in final_model.parameters()):,}", flush=True)
 print(f"\nModel architecture:\n{final_model}", flush=True)
